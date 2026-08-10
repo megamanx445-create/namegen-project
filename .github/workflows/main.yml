@@ -1,1 +1,45 @@
+name: Main Workflow
 
+on:
+  push:
+    branches:
+      - master
+  
+permissions:
+  contents: read
+  id-token: write
+
+
+jobs:
+    cicd:
+        name: deploy using aws eks cluster
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Configure temporary AWS credentials
+          uses: aws-actions/configure-aws-credentials@v6.1.0
+          with:
+            aws-region: us-east-2
+            role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole
+            role-session-name: GitHubActionsSession-${GITHUB_RUN_ID}
+
+        - name: confirm AWS credentials
+          run: aws sts get-caller-identity
+
+        - name: login to Amazon ECR
+          id: login-ecr
+          uses: aws-actions/amazon-ecr-login@v2
+
+        - name: Build, tag, and push image to Amazon ECR
+          env:
+              ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+              ECR_REPOSITORY: myapps/namegen
+              IMAGE_TAG: latest
+          run: |
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./docker
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+        
