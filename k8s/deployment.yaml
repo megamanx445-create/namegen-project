@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: namegen-app
+  labels:
+    app: namegen-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: namegen-app
+  template:
+    metadata:
+      labels:
+        app: namegen-app
+    spec:
+      containers:
+        - name: namegen-app
+          image: node:20-alpine:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGODB_URL
+              value: mongodb://genuser:password@mongodb/namegen
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: namegen-service
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+spec:
+  type: LoadBalancer
+  selector:
+    app: namegen-app
+  ports:
+  - port: 80
+    targetPort: 8080
+    protocol: TCP
+
