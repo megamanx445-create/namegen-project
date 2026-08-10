@@ -1,10 +1,9 @@
 # Dockerfile for namegen-project
-FROM node:20-alpine
+FROM node:boron
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN apk add --no-cache git ca-certificates
 RUN git clone https://github.com/redhat-developer-demos/namegen.git .
 
 RUN npm install
