@@ -24,7 +24,7 @@ jobs:
           with:
             aws-region: us-east-2
             role-to-assume: arn:aws:iam::123456789012:role/github-actions-role-namegen
-            role-session-name: GitHubActionsSession-${GITHUB_RUN_ID}
+            role-session-name: github-actions-${{ github.run_id }}
 
         - name: confirm AWS credentials
           run: aws sts get-caller-identity
