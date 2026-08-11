@@ -52,6 +52,6 @@ jobs:
             kubectl apply -f ./k8s/DB-sts.yaml
             kubectl apply -f ./k8s/deployment.yaml
             kubectl set image deployment/namegen-app namegen=843282289076.dkr.ecr.us-east-2.amazonaws.com/myapps/namegen:${{ github.sha }}
-            kubectl rollout status deployment.apps/namegen-app
+            kubectl rollout status deployment/namegen-app
             kubectl rollout status statefulset/mongo         
             kubectl get services namegen-service
