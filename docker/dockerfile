@@ -1,14 +1,12 @@
 # Dockerfile for namegen-project
-FROM node:boron
+FROM node:18-alpine
 
-RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-RUN git clone https://github.com/redhat-developer-demos/namegen.git .
-
+COPY package*.json ./
 RUN npm install
 
 COPY . .
 
 EXPOSE 8080
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

@@ -4,6 +4,7 @@
   "description": "A demonstration application for automatically generating names for storage in a database",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "test"
   },
   "author": "Bob Reselman <reselbob@gmail.com>",
