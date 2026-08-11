@@ -3,19 +3,19 @@ kind: Deployment
 metadata:
   name: namegen-app
   labels:
-    app: namegen-app
+    app: namegen
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: namegen-app
+      app: namegen
   template:
     metadata:
       labels:
-        app: namegen-app
+        app: namegen
     spec:
       containers:
-        - name: namegen-app
+        - name: namegen
           image: 843282289076.dkr.ecr.us-east-2.amazonaws.com/myapps/namegen:4e5fe873ab888f59679ada780257547fc4f84da3
           imagePullPolicy: IfNotPresent
           ports:
@@ -34,7 +34,7 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app: namegen-app
+    app: namegen
   ports:
   - port: 80
     targetPort: 8080
