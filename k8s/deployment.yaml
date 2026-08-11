@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: namegen-app
-          image: node:20-alpine:latest
+          image: 843282289076.dkr.ecr.us-east-2.amazonaws.com/myapps/namegen:4e5fe873ab888f59679ada780257547fc4f84da3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

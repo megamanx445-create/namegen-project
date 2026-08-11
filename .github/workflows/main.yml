@@ -42,4 +42,16 @@ jobs:
             docker build -f docker/dockerfile -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-        
+        - name: Configure eks access
+          run: |
+            aws eks update-kubeconfig --region us-east-2 --name namegen-cluster
+    
+        - name: EKS deployment
+          run: |
+            kubectl apply -f ./k8s/storage-class.yaml
+            kubectl apply -f ./k8s/DB-sts.yaml
+            kubectl apply -f ./k8s/deployment.yaml
+            kubectl set image deployment/namegen-app namegen=843282289076.dkr.ecr.us-east-2.amazonaws.com/myapps/namegen:${{ github.sha }}
+            kubectl rollout status deployment/namegen-app
+            kubectl rollout status statefulset/mongo         
+            kubectl get services namegen-service
