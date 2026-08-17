@@ -22,7 +22,7 @@ spec:
             - containerPort: 8080
           env:
             - name: MONGODB_URL
-              value: mongodb://genuser:password@mongodb/namegen
+              value: mongodb://genuser:password@mongo/namegen
 ---
 apiVersion: v1
 kind: Service
