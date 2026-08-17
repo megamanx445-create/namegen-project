@@ -20,7 +20,8 @@ spec:
           image: mongo:3.6
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 27017          
+            - containerPort: 27017
+              name: mongodb         
           volumeMounts:
             - name: mongo-data
               mountPath: /data/db
@@ -28,10 +29,11 @@ spec:
     - metadata:
         name: mongo-data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        storageClassName: cluster-sc
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: 5Gi
+            storage: 10Gi
 ---
 apiVersion: v1
 kind: Service
@@ -40,10 +42,10 @@ metadata:
   labels:
     app: mongo
 spec:
-  selector:
+  clusterIP: None
     app: mongo
   ports:
     - port: 27017
-      targetPort: 27017
-      protocol: TCP
-  clusterIP: None
+      name: mongodb
+  selector:
+    app: mongo
