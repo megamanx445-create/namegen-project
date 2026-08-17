@@ -43,7 +43,6 @@ metadata:
     app: mongo
 spec:
   clusterIP: None
-    app: mongo
   ports:
     - port: 27017
       name: mongodb
