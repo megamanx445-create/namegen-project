@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  serviceName: mongo
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          # CRITICAL: MongoDB 3.6 is End-of-Life (EOL). Upgrade to a supported version (e.g., 6.0 or 7.0).
+          # SECURITY: Missing root/initial user credentials setup (e.g., MONGO_INITDB_ROOT_USERNAME, MONGO_INITDB_ROOT_PASSWORD).
+          # RECOMMENDATION: Missing container resource requests/limits (CPU and Memory).
+          image: mongo:3.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        # RECOMMENDATION: Verify that 'cluster-sc' exists in the target cluster (`kubectl get sc`).
+        storageClassName: cluster-sc
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+spec:
+  clusterIP: None
+  ports:
+    - port: 27017
+      name: mongodb
+  selector:
+    app: mongo
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: namegen-app
+  labels:
+    app: namegen
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: namegen
+  template:
+    metadata:
+      labels:
+        app: namegen
+    spec:
+      containers:
+        - name: namegen
+          # RECOMMENDATION: Verify cluster node IAM roles or imagePullSecrets have pull access to this private ECR registry.
+          image: 843282289076.dkr.ecr.us-east-2.amazonaws.com/myapps/namegen:4e5fe873ab888f59679ada780257547fc4f84da3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGODB_URL
+              # CRITICAL (FIXED): Standardized hostname from 'mongodb' to 'mongo' to match the headless Service name.
+              # SECURITY: Plaintext credentials exposed in code. Extract 'genuser:password' to a Kubernetes Secret (valueFrom.secretKeyRef).
+              value: mongodb://genuser:password@mongo/namegen
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: namegen-service
+  annotations:
+    # RECOMMENDATION: Ensure AWS Load Balancer Controller is installed in the cluster to process these annotations.
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+spec:
+  type: LoadBalancer
+  selector:
+    app: namegen
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
