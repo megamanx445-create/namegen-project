@@ -251,7 +251,7 @@ Set these repository variables or secrets before running the workflow:
 | --- | --- |
 | `aws-region` | Region containing EKS and ECR. |
 | `role-to-assume` | IAM role assumed by GitHub Actions. |
-| `role-session-name` | Github repository url with repo id and project id |
+| `role-session-name` |  a unique identifier(ID) for the workflow   |
 | `ECR_REGISTRY` | ECR registry . |
 | `ECR_REPOSITORY` | ECR repository name for the application image. |
 | `IMAGE_TAG` | get image tag. |
