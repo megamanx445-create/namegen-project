@@ -9,16 +9,19 @@ const dbName = process.env.DB_NAME || 'namegen'
 
 let connection;
 
+const getMongoDbUrl = () => {
+    const parsedUrl = new URL(process.env.MONGODB_URL);
+    if (!parsedUrl.pathname || parsedUrl.pathname === '/') {
+        parsedUrl.pathname = `/${dbName}`;
+    }
+    return parsedUrl.toString();
+};
+
 const getConnection = async () => {
     if (!connection) {
-        let mStr = process.env.MONGODB_URL;
-        let url = mStr;
-        //make sure there is a database name in play
-        if(mStr.substring(mStr.length - dbName.length) !== dbName){
-            url = mStr + '/' + dbName;
-        }
+        const url = getMongoDbUrl();
         let conn;
-        logger.info(`Attempting to connect at url: ${url}.`)
+        logger.info('Attempting to connect to MongoDB.');
         conn = await mongoose.connect(url).catch(e =>{
             console.error(e);
             throw e;
@@ -38,7 +41,7 @@ const closeConnection = async () => {
 }
 
 const getConnectionUrlSync = () => {
-    return `${process.env.MONGODB_URL}/${dbName}`;
+    return getMongoDbUrl();
 };
 
 module.exports = {getConnection, closeConnection, getConnectionUrlSync};
