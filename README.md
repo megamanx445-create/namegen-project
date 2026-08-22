@@ -266,7 +266,7 @@ git push
 
 Use the GitHub Actions run logs to confirm the image was pushed and the Kubernetes rollout completed.
 
-## 7. Set up monitoring on EC2
+## 7. Install kube-prometheus-stack in the cluster
 
 <p align="center">
   <img src="assets/logos/kubernetes.svg" alt="Kubernetes" height="48" />
@@ -278,9 +278,32 @@ Use the GitHub Actions run logs to confirm the image was pushed and the Kubernet
   <img src="assets/logos/grafana.svg" alt="Grafana" height="48" />
 </p>
 
-Create an EC2 instance dedicated to monitoring. Allow administrative access only from trusted IP addresses and allow Grafana access on port `3000` only from approved users or networks.
+Install the Prometheus Operator, Prometheus, Grafana, Node Exporter, and kube-state-metrics in the EKS cluster with the `kube-prometheus-stack` Helm chart. Run these commands from a workstation or CloudShell with the EKS kubeconfig already configured:
 
-Install Prometheus and Grafana on the instance. Configure Prometheus to scrape the EKS cluster through a secure connection, then add Prometheus as a Grafana data source. Create dashboards for:
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+    --namespace monitoring \
+    --create-namespace \
+    --wait
+```
+
+Verify that the monitoring workloads are ready:
+
+```bash
+kubectl get pods -n monitoring
+kubectl get prometheus,servicemonitor -n monitoring
+```
+
+For a local Grafana session, forward the Grafana service port:
+
+```bash
+kubectl port-forward -n monitoring svc/kube-prometheus-stack-grafana 3000:80
+```
+
+Open `http://localhost:3000`. The chart provisions Prometheus as Grafana's data source and includes dashboards for:
 
 - EKS node CPU, memory, and disk utilization;
 - pod health, restarts, and replica counts;
@@ -292,15 +315,12 @@ flowchart LR
     subgraph EKS[Amazon EKS]
         APP[Name Generator]
         DB[(MongoDB)]
-    end
-
-    subgraph EC2[Monitoring EC2]
         P[Prometheus collects metrics]
         G[Grafana dashboards]
     end
 
-    APP --> P
-    DB --> P
+    APP -. metrics .-> P
+    DB -. metrics .-> P
     P --> G
     G --> U[Operations team]
 
