@@ -162,6 +162,62 @@ Create an IAM role for GitHub Actions that uses GitHub's OIDC provider. Restrict
 
 Add the IAM role to the cluster as an EKS access entry. Associate an appropriate access policy, such as `AmazonEKSClusterAdminPolicy` for a learning environment; use a least-privilege access policy in production.
 
+Github actions role policy:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "ECRAuthToken",
+            "Effect": "Allow",
+            "Action": "ecr:GetAuthorizationToken",
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECRPushPullOps",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:BatchGetImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:PutImage"
+            ],
+            "Resource": "arn:aws:ecr:<region>:<aws_user_id>:repository<ECR_repository>"
+        },
+        {
+            "Sid": "EKSdescribecluster",
+            "Effect": "Allow",
+            "Action": [
+                "eks:DescribeCluster"
+            ],
+            "Resource": [
+                "arn:aws:eks:<region>:<aws_user_id>:cluster/<cluster_name>"
+            ]
+        }
+    ]
+}
+
+Github actions role Trust relationships:
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Federated": "arn:aws:iam::<aws_user_id>:oidc-provider/token.actions.githubusercontent.com"
+            },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition": {
+                "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+                    "token.actions.githubusercontent.com:sub": "repo:<Github_user@unique_user_id>/<Github_repo@unique_repo_id>:ref:refs/heads/master"
+                }
+            }
+        }
+    ]
+}
+
 ```bash
 aws eks create-access-entry \
   --cluster-name namegen-cluster \
@@ -195,7 +251,7 @@ Set these repository variables or secrets before running the workflow:
 | --- | --- |
 | `aws-region` | Region containing EKS and ECR. |
 | `role-to-assume` | IAM role assumed by GitHub Actions. |
-| `role-session-name` | get github id |
+| `role-session-name` |  a unique identifier(ID) for the workflow   |
 | `ECR_REGISTRY` | ECR registry . |
 | `ECR_REPOSITORY` | ECR repository name for the application image. |
 | `IMAGE_TAG` | get image tag. |
