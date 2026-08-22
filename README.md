@@ -100,12 +100,12 @@ k8s/storage-class.yaml
 
 The Kubernetes resources should provide:
 
-- `DB-sts.yaml`: a Kubernetes Secret containing MongoDB credentials, along with the MongoDB StatefulSet, headless service, and persistent volume claim.
+- `DB-sts.yaml`: the MongoDB StatefulSet, headless service, and persistent volume claim. The GitHub Actions workflow creates the MongoDB Secret from repository secrets before applying this file.
 - `deployment.yaml`: the Name Generator Deployment, Service, container port `8080`, and MongoDB username, password, and URL environment variables.
 - `storage-class.yaml`: the storage class used by MongoDB persistence.
 - `cluster.yaml`: an EKS cluster configuration named `namegen-cluster` in the selected AWS Region.
 
-Before applying `k8s/DB-sts.yaml`, replace `<MONGODB_USERNAME>` and `<MONGODB_PASSWORD>` in its Secret with strong values. Keep the Secret out of source control when using real credentials.
+Store strong MongoDB credentials in the GitHub repository secrets `MONGODB_USERNAME` and `MONGODB_PASSWORD`. The deployment workflow creates or updates the Kubernetes Secret without writing the credentials to the repository.
 
 Example cluster configuration:
 
@@ -261,6 +261,8 @@ Set these repository variables or secrets before running the workflow:
 | `ECR_REGISTRY` | ECR registry . |
 | `ECR_REPOSITORY` | ECR repository name for the application image. |
 | `IMAGE_TAG` | get image tag. |
+| `MONGODB_USERNAME` | MongoDB root username created by the MongoDB container. |
+| `MONGODB_PASSWORD` | MongoDB root password created by the MongoDB container. |
 
 Commit and push the workflow to start the pipeline:
 

@@ -59,12 +59,3 @@ spec:
       name: mongodb
   selector:
     app: mongo
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mongodb-credentials
-type: Opaque
-stringData:
-  username: <MONGODB_USERNAME>
-  password: <MONGODB_PASSWORD>
