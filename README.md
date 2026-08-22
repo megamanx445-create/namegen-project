@@ -163,6 +163,7 @@ Create an IAM role for GitHub Actions that uses GitHub's OIDC provider. Restrict
 Add the IAM role to the cluster as an EKS access entry. Associate an appropriate access policy, such as `AmazonEKSClusterAdminPolicy` for a learning environment; use a least-privilege access policy in production.
 
 Github actions role policy:
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -197,8 +198,10 @@ Github actions role policy:
         }
     ]
 }
+```
 
 Github actions role Trust relationships:
+```json
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -217,6 +220,7 @@ Github actions role Trust relationships:
         }
     ]
 }
+```
 
 ```bash
 aws eks create-access-entry \
