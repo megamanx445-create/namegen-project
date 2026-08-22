@@ -248,8 +248,10 @@ Create `.github/workflows/main.yml`. The workflow should run on pushes to `maste
 4. login to Amazon ECR.
 5. Build, tag, and push image to Amazon ECR.
 6. Configure eks access.
-7. configure kubectl commands for EKS deployment.
-8. Wait for the application rollout to finish.
+7. Install or upgrade `kube-prometheus-stack` in the `monitoring` namespace.
+8. Create or update the `mongodb-credentials` Kubernetes Secret from the `MONGODB_USERNAME` and `MONGODB_PASSWORD` repository secrets.
+9. Apply the Kubernetes manifests and update the application image.
+10. Wait for the application rollout to finish.
 
 Set these repository variables or secrets before running the workflow:
 

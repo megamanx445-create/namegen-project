@@ -46,6 +46,16 @@ jobs:
           run: |
             aws eks update-kubeconfig --region us-east-2 --name namegen-cluster
 
+        - name: Install kube-prometheus-stack
+          run: |
+            helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+            helm repo update
+            helm upgrade --install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+              --namespace monitoring \
+              --create-namespace \
+              --wait \
+              --timeout 10m
+
         - name: Create MongoDB Kubernetes secret
           env:
             MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
